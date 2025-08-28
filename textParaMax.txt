@@ -1,0 +1,5 @@
+Estamos fomentado el uso de git y el aprendisaje con ramas. 
+Son las 12:17. (28/agosto/2025)
+Cuando veas esto max.
+Tienes que agregar la hora y la fecha que tienes y agregar algo que aprendiste de
+git que te guste!
