@@ -21,35 +21,27 @@ def get_days_of_month():
     now = datetime.now()
     return calendar.monthrange(now.year, now.month)[1]
 
-
 def get_month_name():
     now = datetime.now()
     return now.strftime("%B-%Y")
 
-def checar_existencia_mes(validar):
+def guardar_json_texto():
+    """Guarda todos los valores actuales en el JSON sin borrar otros meses"""
+    fecha_mes_anio = get_month_name() # mes-año actual
 
-    fecha_mes_anio = validar
+    # 1. Leer el JSON si existe, o iniciar vacío
     if os.path.exists(ARCHIVO_JSON):
         with open(ARCHIVO_JSON, "r", encoding="utf-8") as f:
             datos = json.load(f)
     else:
         datos = {}
-    
-    if fecha_mes_anio not in datos:
-        print("se agrego el mes y año")
-        datos[fecha_mes_anio] = {}
-    
-    
 
-
-def guardar_json_texto():
-    """Guarda todos los valores actuales en el JSON"""
-    fecha_mes_anio = get_month_name() # solo obtienes la fecha en mes-año
-    checar_existencia_mes(fecha_mes_anio)
-    datos = {fecha_mes_anio: {} }
+    # 2. Actualizar o crear el mes actual
+    datos[fecha_mes_anio] = {}
     for dia in dias_mes:
         datos[fecha_mes_anio][str(dia.numero)] = dia.valor
 
+    # 3. Guardar todo de nuevo
     with open(ARCHIVO_JSON, "w", encoding="utf-8") as f:
         json.dump(datos, f, indent=4, ensure_ascii=False)
 
@@ -65,10 +57,10 @@ def limitar_texto(var, dia_obj):
 
 def cargar_json():
     """Carga los valores guardados en los objetos Dia"""
-    fecha_mes_anio = get_month_name()
+    fecha_mes_anio =  get_month_name()
     if os.path.exists(ARCHIVO_JSON):
-        with open(ARCHIVO_JSON, "r", encoding="utf-8") as f:
-            datos = json.load(f)
+        with open(ARCHIVO_JSON, "r", encoding="utf-8") as file:
+            datos = json.load(file)
 
         if fecha_mes_anio in datos:
             print("si esta en el json")
@@ -85,6 +77,10 @@ class Dia:
         self.numero = numero
         self.valor = ""  # valor ingresado por el usuario
 
+class Check_dia:
+    def __init__(self, numero):
+        self.numero = numero
+        self.valor = None # se teine que almacenar en booleano
 
 # ---------------------------
 # INICIALIZACIÓN DE DATOS
@@ -101,15 +97,16 @@ window.title("Notas por día")
 window.state("zoomed")
 window.config(padx=20, pady=20, bg=BACKGROUND_COLOR)
 
+
 # Título del mes
 titulo_mes = tk.Label(
     window,
-    text=get_month_name(),
+    text=f"Mes:{get_month_name()}",
     font=("Arial", 18, "bold"),
     bg=BACKGROUND_COLOR,
     fg="black",
 )
-titulo_mes.grid(row=0, column=0, pady=(0, 10), sticky="w")
+titulo_mes.grid(row=0, column=0, pady=(0, 10), sticky="nsew")
 
 # Contenedor para los días
 frame_dias = tk.Frame(window, bg=BACKGROUND_COLOR)
@@ -118,15 +115,13 @@ frame_dias.grid(row=1, column=0)
 # Generar campos dinámicamente por día
 for i, dia_obj in enumerate(dias_mes):
     # Etiqueta del día
-    etiqueta = tk.Label(
-        frame_dias, text=f"{dia_obj.numero}", width=8, bg=BACKGROUND_COLOR, fg="black"
-    )
+    etiqueta = tk.Label(frame_dias, text=f"{dia_obj.numero}", width=8, bg=BACKGROUND_COLOR, fg="black")
     etiqueta.grid(row=i, column=0, padx=2, pady=2)
-
+    dias_check_mark = tk.Label(frame_dias, text=f"{dia_obj.numero}", width=8 ,bg=BACKGROUND_COLOR, fg="black")
+    dias_check_mark.grid(row=i, column=2, padx=50, pady=2)
     # Variable para el Entry
     var = tk.StringVar(value=dia_obj.valor)  # cargamos el valor existente
     var.trace_add("write", lambda *args, v=var, d=dia_obj: limitar_texto(v, d))
-
     # Entry del día
     entry = tk.Entry(
         frame_dias,
