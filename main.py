@@ -3,6 +3,7 @@ import calendar
 from datetime import datetime
 import json
 import os
+import platform
 
 # ---------------------------
 # CONSTANTES
@@ -143,7 +144,6 @@ def cargar_json():
             datos = json.load(file)
 
         if fecha_mes_anio in datos:
-            print("sí está en el JSON")
             for dia in dias_mes:
                 if str(dia.numero) in datos[fecha_mes_anio]:
                     dia.valor = datos[fecha_mes_anio][str(dia.numero)]
@@ -192,7 +192,11 @@ cargar_json()  # cargar valores existentes
 # ---------------------------
 window = tk.Tk()
 window.title("Notas por día")
-window.attributes("-zoomed", True)  # esto funciona en Linux, checar en Windows si funciona!
+# Detecta el sistema operativo
+if platform.system() == "Windows":
+    window.state("zoomed")   # Maximiza en Windows
+else:
+    window.attributes("-zoomed", True)  # Maximiza en Linux/Mac
 window.config(padx=20, pady=20, bg=BACKGROUND_COLOR)
 
 # Título del mes
